@@ -14,16 +14,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -38,12 +42,28 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ComposePickPocketTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    MyButton(number = "Here is a button")
-                }
+               RootLayout(Modifier.padding(25.dp))
             }
         }
+    }
+}
+
+@Composable
+fun RootLayout(modifier: Modifier = Modifier){
+    Scaffold(modifier = modifier) {
+        Column(modifier = modifier.padding(20.dp)) {
+            Text(text = "Well here we go", modifier = modifier)
+            Text(text = "Damn here we are", modifier = modifier)
+            Text(text = "There we went", modifier = modifier)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RootLayoutPreview(){
+    ComposePickPocketTheme {
+        RootLayout(Modifier.padding(5.dp))
     }
 }
 
@@ -59,8 +79,14 @@ fun CardPreview() {
 fun PhotographerCard() {
     val context = LocalContext.current
     Row(modifier = Modifier
-        .padding(24.dp)
-        .clickable { Toast.makeText(context, "Heard", Toast.LENGTH_SHORT).show() }
+        .clickable {
+            Toast
+                .makeText(context, "Heard", Toast.LENGTH_SHORT)
+                .show()
+        }
+        .clip(RoundedCornerShape(40.dp))
+        .background(Color.Gray)
+        .padding(end = 10.dp)
     ) {
         Surface(
             modifier = Modifier.size(50.dp),
@@ -68,8 +94,9 @@ fun PhotographerCard() {
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
         ) {
             // Image goes here
+
         }
-        Column(modifier = Modifier.padding(start = 100.dp)) {
+        Column(modifier = Modifier.padding(start = 8.dp)) {
             Text("Alfred Sisley", fontWeight = FontWeight.Bold)
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text("3 minutes ago", style = MaterialTheme.typography.body2)
@@ -80,7 +107,6 @@ fun PhotographerCard() {
 
 @Composable
 fun MyButton(number: String) {
-    // TODO Center text
     val context = LocalContext.current
     Button(onClick = { Toast.makeText(context, "Heard", Toast.LENGTH_SHORT).show() }) {
         Box(
