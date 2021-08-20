@@ -4,15 +4,20 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -27,7 +32,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -35,35 +39,58 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deanthonee.composepickpocket.ui.theme.ComposePickPocketTheme
+import java.util.ArrayList
 
+@ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
+
+    private lateinit var names: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ComposePickPocketTheme {
-               RootLayout(Modifier.padding(25.dp))
+                names = listOfPhotographers(40)
+                RootLayout(list = names)
             }
         }
     }
 }
 
+@ExperimentalFoundationApi
 @Composable
-fun RootLayout(modifier: Modifier = Modifier){
+fun RootLayout(modifier: Modifier = Modifier, list: List<String>) {
     Scaffold(modifier = modifier) {
-        Column(modifier = modifier.padding(20.dp)) {
-            Text(text = "Well here we go", modifier = modifier)
-            Text(text = "Damn here we are", modifier = modifier)
-            Text(text = "There we went", modifier = modifier)
+        LazyColumn(
+            modifier = modifier
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+           val sortedList = list.sortedBy { it }
+            val groupedNames = sortedList.groupBy { it[0] }
+
+
+            groupedNames.forEach { intial, contacts ->
+                stickyHeader {
+                    Text(text = intial.toString())
+                }
+                contacts.forEach {
+                    item {
+                        PhotographerCard(authorName = it)
+                    }
+                }
+            }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true)
 @Composable
-fun RootLayoutPreview(){
+fun RootLayoutPreview() {
     ComposePickPocketTheme {
-        RootLayout(Modifier.padding(5.dp))
+        RootLayout(Modifier.padding(5.dp), list = listOfPhotographers(50))
     }
 }
 
@@ -71,12 +98,62 @@ fun RootLayoutPreview(){
 @Composable
 fun CardPreview() {
     ComposePickPocketTheme {
-        PhotographerCard()
+        PhotographerCard("DeAnthonee King")
     }
 }
 
+fun listOfPhotographers(numberOfNames: Int): List<String> {
+
+    val listOfFirstNames = listOf(
+        "Maggie",
+        "Johhny",
+        "Orin",
+        "Tiffany",
+        "Sabrina",
+        "Erin",
+        "Alberto",
+        "Andy",
+        "Anthony",
+        "DeAnthonee",
+        "Dejean",
+        "Demonte",
+        "DeMario",
+        "Kennedy-Anne",
+        "Bobby",
+        "Billy",
+        "Corey",
+        "Zappy",
+        "Xina",
+        "Xeolyne",
+        "Stacy"
+    )
+    val listOfLastNames = listOf(
+        "Johnson",
+        "Stevens",
+        "Tillsons",
+        "Smiths",
+        "Legend",
+        "Marvel",
+        "Torando",
+        "Sharker",
+        "Nagger",
+        "Neegan",
+        "Milly Wap"
+    )
+
+    val fullNames = ArrayList<String>()
+
+    for (x in 0..numberOfNames) {
+        val first = listOfFirstNames.random()
+        val last = listOfLastNames.random()
+        val name = "$first $last"
+        fullNames.add(name)
+    }
+    return fullNames
+}
+
 @Composable
-fun PhotographerCard() {
+fun PhotographerCard(authorName: String) {
     val context = LocalContext.current
     Row(modifier = Modifier
         .clickable {
@@ -97,7 +174,7 @@ fun PhotographerCard() {
 
         }
         Column(modifier = Modifier.padding(start = 8.dp)) {
-            Text("Alfred Sisley", fontWeight = FontWeight.Bold)
+            Text(authorName, fontWeight = FontWeight.Bold)
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text("3 minutes ago", style = MaterialTheme.typography.body2)
             }
