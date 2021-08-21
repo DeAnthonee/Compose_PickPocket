@@ -37,7 +37,9 @@ val ui = GameUiElements()
 fun setBodyUi(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
-        topBar = {ui.MyTopBar()}
+        topBar = {ui.MyTopBar{
+
+        }}
     ) {
 
     }
