@@ -1,5 +1,6 @@
-package com.deanthonee.composepickpocket
+package com.deanthonee.composepickpocket.screens.home
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,11 +23,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -38,50 +44,77 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.deanthonee.composepickpocket.screens.gamescreen.GameUiElements
 import com.deanthonee.composepickpocket.ui.theme.ComposePickPocketTheme
 import java.util.ArrayList
 
 @ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
 
+    private val randomPicUrl = "https://source.unsplash.com/random/200x200?sig="
     private lateinit var names: List<String>
+    private lateinit var context: Context
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ComposePickPocketTheme {
+                context = LocalContext.current
                 names = listOfPhotographers(40)
                 RootLayout(list = names)
             }
         }
     }
+
+}
+
+private fun littleAction(context: Context){
+    Toast.makeText(context, "Heard", Toast.LENGTH_SHORT).show()
 }
 
 @ExperimentalFoundationApi
 @Composable
 fun RootLayout(modifier: Modifier = Modifier, list: List<String>) {
-    Scaffold(modifier = modifier) {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-           val sortedList = list.sortedBy { it }
-            val groupedNames = sortedList.groupBy { it[0] }
-
-
-            groupedNames.forEach { intial, contacts ->
-                stickyHeader {
-                    Text(text = intial.toString())
-                }
-                contacts.forEach {
-                    item {
-                        PhotographerCard(authorName = it)
+    val context = LocalContext.current
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Pick Pocket") },
+                actions = {
+                    IconButton(onClick = {
+                        littleAction(context = context)
+                    }) {
+                        Icon(Icons.Filled.Favorite, contentDescription = null)
                     }
                 }
-            }
+            )
         }
+    ) {
+        val ui = GameUiElements()
+        ui.GuessList(list = list)
+        
+//        LazyColumn(
+//            modifier = modifier
+//                .fillMaxWidth(),
+//            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+//            verticalArrangement = Arrangement.spacedBy(8.dp)
+//        ) {
+//            val sortedList = list.sortedBy { it }
+//            val groupedNames = sortedList.groupBy { it[0] }
+//
+//
+//            groupedNames.forEach { intial, contacts ->
+//                stickyHeader {
+//                    Text(text = intial.toString())
+//                }
+//                contacts.forEach {
+//                    item {
+//                        PhotographerCard(authorName = it)
+//                    }
+//                }
+//            }
+//        }
     }
 }
 
