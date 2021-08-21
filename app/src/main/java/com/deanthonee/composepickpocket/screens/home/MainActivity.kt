@@ -5,34 +5,31 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -48,82 +45,76 @@ import com.deanthonee.composepickpocket.screens.gamescreen.GameUiElements
 import com.deanthonee.composepickpocket.ui.theme.ComposePickPocketTheme
 import java.util.ArrayList
 
+@ExperimentalAnimationApi
 @ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
 
     private val randomPicUrl = "https://source.unsplash.com/random/200x200?sig="
     private lateinit var names: List<String>
     private lateinit var context: Context
+    val ui = GameUiElements()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ComposePickPocketTheme {
                 context = LocalContext.current
-                names = listOfPhotographers(40)
-                RootLayout(list = names)
+                names = listOfPhotographers(300)
+                RootLayout(list = names, ui = ui)
+
             }
         }
     }
 
 }
 
-private fun littleAction(context: Context){
+private fun littleAction(context: Context) {
     Toast.makeText(context, "Heard", Toast.LENGTH_SHORT).show()
 }
 
+@ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @Composable
-fun RootLayout(modifier: Modifier = Modifier, list: List<String>) {
+fun RootLayout(modifier: Modifier = Modifier, list: List<String>, ui: GameUiElements) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    // Should try to extract this out as well
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Pick Pocket") },
-                actions = {
-                    IconButton(onClick = {
-                        littleAction(context = context)
-                    }) {
-                        Icon(Icons.Filled.Favorite, contentDescription = null)
-                    }
-                }
-            )
+            ui.MyTopBar {
+                littleAction(context = context)
+            }
         }
     ) {
-        val ui = GameUiElements()
-        ui.GuessList(list = list)
-        
-//        LazyColumn(
-//            modifier = modifier
-//                .fillMaxWidth(),
-//            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            val sortedList = list.sortedBy { it }
-//            val groupedNames = sortedList.groupBy { it[0] }
-//
-//
-//            groupedNames.forEach { intial, contacts ->
-//                stickyHeader {
-//                    Text(text = intial.toString())
-//                }
-//                contacts.forEach {
-//                    item {
-//                        PhotographerCard(authorName = it)
-//                    }
-//                }
-//            }
-//        }
+        Box() {
+            ui.GuessList(list = list, state = listState)
+        }
     }
+
+    val showButton = listState.firstVisibleItemIndex > 5
+
+    AnimatedVisibility(
+        visible = showButton,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        ui.ScrollToTopButton {
+            littleAction(context = context)
+        }
+    }
+
 }
 
+@ExperimentalAnimationApi
 @OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true)
 @Composable
 fun RootLayoutPreview() {
+    val ui = GameUiElements()
     ComposePickPocketTheme {
-        RootLayout(Modifier.padding(5.dp), list = listOfPhotographers(50))
+        RootLayout(Modifier.padding(5.dp), list = listOfPhotographers(50), ui = ui)
     }
 }
 
