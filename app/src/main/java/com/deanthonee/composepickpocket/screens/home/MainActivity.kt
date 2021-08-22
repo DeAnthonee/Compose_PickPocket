@@ -10,12 +10,12 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +32,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,9 +42,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
+import coil.transform.CircleCropTransformation
 import com.deanthonee.composepickpocket.screens.gamescreen.GameUiElements
 import com.deanthonee.composepickpocket.ui.theme.ComposePickPocketTheme
-import java.util.ArrayList
+import com.deanthonee.composepickpocket.utils.FakeData
+import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -59,13 +63,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComposePickPocketTheme {
                 context = LocalContext.current
-                names = listOfPhotographers(300)
+                names = FakeData().listOfFullNames(200)
                 RootLayout(list = names, ui = ui)
-
             }
         }
     }
-
 }
 
 private fun littleAction(context: Context) {
@@ -78,6 +80,8 @@ private fun littleAction(context: Context) {
 fun RootLayout(modifier: Modifier = Modifier, list: List<String>, ui: GameUiElements) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showButton = listState.firstVisibleItemIndex > 5
 
     // Should try to extract this out as well
     Scaffold(
@@ -90,21 +94,20 @@ fun RootLayout(modifier: Modifier = Modifier, list: List<String>, ui: GameUiElem
     ) {
         Box() {
             ui.GuessList(list = list, state = listState)
+            AnimatedVisibility(
+                visible = showButton,
+                modifier = modifier.align(Alignment.BottomCenter),
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                ui.ScrollToTopButton {
+                    scope.launch {
+                        listState.animateScrollToItem(0)
+                    }
+                }
+            }
         }
     }
-
-    val showButton = listState.firstVisibleItemIndex > 5
-
-    AnimatedVisibility(
-        visible = showButton,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        ui.ScrollToTopButton {
-            littleAction(context = context)
-        }
-    }
-
 }
 
 @ExperimentalAnimationApi
@@ -114,117 +117,11 @@ fun RootLayout(modifier: Modifier = Modifier, list: List<String>, ui: GameUiElem
 fun RootLayoutPreview() {
     val ui = GameUiElements()
     ComposePickPocketTheme {
-        RootLayout(Modifier.padding(5.dp), list = listOfPhotographers(50), ui = ui)
+        RootLayout(Modifier.padding(5.dp), list = FakeData().listOfFullNames(20), ui = ui)
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun CardPreview() {
-    ComposePickPocketTheme {
-        PhotographerCard("DeAnthonee King")
-    }
-}
 
-fun listOfPhotographers(numberOfNames: Int): List<String> {
-
-    val listOfFirstNames = listOf(
-        "Maggie",
-        "Johhny",
-        "Orin",
-        "Tiffany",
-        "Sabrina",
-        "Erin",
-        "Alberto",
-        "Andy",
-        "Anthony",
-        "DeAnthonee",
-        "Dejean",
-        "Demonte",
-        "DeMario",
-        "Kennedy-Anne",
-        "Bobby",
-        "Billy",
-        "Corey",
-        "Zappy",
-        "Xina",
-        "Xeolyne",
-        "Stacy"
-    )
-    val listOfLastNames = listOf(
-        "Johnson",
-        "Stevens",
-        "Tillsons",
-        "Smiths",
-        "Legend",
-        "Marvel",
-        "Torando",
-        "Sharker",
-        "Nagger",
-        "Neegan",
-        "Milly Wap"
-    )
-
-    val fullNames = ArrayList<String>()
-
-    for (x in 0..numberOfNames) {
-        val first = listOfFirstNames.random()
-        val last = listOfLastNames.random()
-        val name = "$first $last"
-        fullNames.add(name)
-    }
-    return fullNames
-}
-
-@Composable
-fun PhotographerCard(authorName: String) {
-    val context = LocalContext.current
-    Row(modifier = Modifier
-        .clickable {
-            Toast
-                .makeText(context, "Heard", Toast.LENGTH_SHORT)
-                .show()
-        }
-        .clip(RoundedCornerShape(40.dp))
-        .background(Color.Gray)
-        .padding(end = 10.dp)
-    ) {
-        Surface(
-            modifier = Modifier.size(50.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
-        ) {
-            // Image goes here
-
-        }
-        Column(modifier = Modifier.padding(start = 8.dp)) {
-            Text(authorName, fontWeight = FontWeight.Bold)
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text("3 minutes ago", style = MaterialTheme.typography.body2)
-            }
-        }
-    }
-}
-
-@Composable
-fun MyButton(number: String) {
-    val context = LocalContext.current
-    Button(onClick = { Toast.makeText(context, "Heard", Toast.LENGTH_SHORT).show() }) {
-        Box(
-            Modifier
-                .height(100.dp)
-                .width(100.dp)
-                .background(Color.Cyan),
-
-            ) {
-            Text(
-                text = number,
-                fontSize = 24.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-    }
-}
 
 @Composable
 fun Greeting(name: String) {
@@ -236,14 +133,6 @@ fun Greeting(name: String) {
         Text(text = "Hello $name!", fontSize = 24.sp)
     }
 
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SecondPreview() {
-    ComposePickPocketTheme() {
-        MyButton(number = "1")
-    }
 }
 
 @Preview(showBackground = true)
