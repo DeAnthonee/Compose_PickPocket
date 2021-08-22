@@ -121,71 +121,7 @@ fun RootLayoutPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun CardPreview() {
-    ComposePickPocketTheme {
-        PhotographerCard("DeAnthonee King", 1)
-    }
-}
 
-@Composable
-fun PhotographerCard(authorName: String, index: Int) {
-    val context = LocalContext.current
-    Row(modifier = Modifier
-        .clickable {
-            Toast
-                .makeText(context, "Heard", Toast.LENGTH_SHORT)
-                .show()
-        }
-        .clip(RoundedCornerShape(40.dp))
-        .background(Color.Gray)
-        .padding(end = 10.dp)
-    ) {
-        Surface(
-            modifier = Modifier.size(50.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
-        ) {
-            // Image goes here
-            val randomPicUrl = "https://source.unsplash.com/random/200x200?sig="
-            val newUrl = randomPicUrl + (index + 1).toString()
-            Image(
-                painter = rememberImagePainter(
-                    data = newUrl,
-                    builder = { transformations(CircleCropTransformation()) }),
-                contentDescription = null,
-                modifier = Modifier.size(50.dp)
-            )
-        }
-        Column(modifier = Modifier.padding(start = 8.dp)) {
-            Text(authorName, fontWeight = FontWeight.Bold)
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text("3 minutes ago", style = MaterialTheme.typography.body2)
-            }
-        }
-    }
-}
-
-@Composable
-fun MyButton(number: String) {
-    val context = LocalContext.current
-    Button(onClick = { Toast.makeText(context, "Heard", Toast.LENGTH_SHORT).show() }) {
-        Box(
-            Modifier
-                .height(100.dp)
-                .width(100.dp)
-                .background(Color.Cyan),
-
-            ) {
-            Text(
-                text = number,
-                fontSize = 24.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-    }
-}
 
 @Composable
 fun Greeting(name: String) {
@@ -197,14 +133,6 @@ fun Greeting(name: String) {
         Text(text = "Hello $name!", fontSize = 24.sp)
     }
 
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SecondPreview() {
-    ComposePickPocketTheme() {
-        MyButton(number = "1")
-    }
 }
 
 @Preview(showBackground = true)
